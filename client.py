@@ -21,6 +21,8 @@ priorityQueue = queue.PriorityQueue()
 
 lamportClock = 0
 
+currentlyWriting = False
+
 
 def do_exit():
     sys.stdout.flush()
@@ -28,8 +30,6 @@ def do_exit():
     for i in range(1,4):
         if (i != process_id):
             try:
-                print(len(connectedClientSockets))
-                print(len(connectedClientIDs))
                 close_socket = connectedClientSockets[i]
                 close_socket.close()
             except Exception as e:
