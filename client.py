@@ -180,9 +180,9 @@ def handle_write_to_server():
     repliesExpected = 0
     startedWriteThread = False
     # for j in range(0, releaseCounter):
+    lamportClock += 1
     for i in connectedClientIDs:
         threading.Thread(target=handle_send_release, args=(lamportClock, i)).start()
-    lamportClock += 1
     print("finished")
 
 
