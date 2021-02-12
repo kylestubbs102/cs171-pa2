@@ -221,8 +221,8 @@ if __name__ == "__main__":
     #     sys.exit()
 
     global process_id 
-    process_id = sys.argv[1]
-    server_port = sys.argv[2]
+    process_id = int(sys.argv[1])
+    server_port = int(sys.argv[2])
 
     server_socket.connect((socket.gethostname(), server_port))
 
