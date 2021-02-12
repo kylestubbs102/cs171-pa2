@@ -221,8 +221,8 @@ def handle_input():
 
 if __name__ == "__main__":
     global process_id 
-    process_id = int(sys.argv[1])
-    server_port = int(sys.argv[2])
+    process_id = 3
+    server_port = 5000
 
     server_socket.connect((socket.gethostname(), server_port))
 
