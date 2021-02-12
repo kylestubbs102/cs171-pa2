@@ -109,8 +109,8 @@ def handle_listen_request(listen_socket, parameter_pid):
         if 'request' == messageCode:
             priorityQueue.put(tuple((count,pid)))
             # lamportClock = max(count, lamportClock) + 1   # maybe send it after
-            threading.Thread(target=handle_send_reply, args=(lamportClock, parameter_pid)).start()
             lamportClock += 1
+            threading.Thread(target=handle_send_reply, args=(lamportClock, parameter_pid)).start()
         elif 'reply' == messageCode:
             print("replies += 1")
             replies += 1
@@ -185,6 +185,8 @@ def handle_write_to_server():
         for i in connectedClientIDs:
             threading.Thread(target=handle_send_release, args=(lamportClock, i)).start()
     print("finished")
+
+    #only 1 broadcast, need to only send 1 request, put other local ones in queue
 
 
 startedWriteThread = False
