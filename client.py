@@ -179,9 +179,9 @@ def handle_write_to_server():
     replies = 0
     repliesExpected = 0
     startedWriteThread = False
-    for j in range(0, releaseCounter):
-        for i in connectedClientIDs:
-            threading.Thread(target=handle_send_release, args=(tempClock, i)).start()
+    # for j in range(0, releaseCounter):
+    for i in connectedClientIDs:
+        threading.Thread(target=handle_send_release, args=(lamportClock, i)).start()
     lamportClock += 1
     print("finished")
 
