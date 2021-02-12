@@ -43,7 +43,7 @@ def do_exit():
 # handles send request when write is typed
 def handle_send_request(pid):
     time.sleep(2)
-    message = 'request ' + str(lamportClock) + ' ' + str(pid)
+    message = 'request ' + str(lamportClock) + ' ' + str(process_id)
     print("send: " + message)
     connectedClientSockets[pid].sendall(message.encode())
 
@@ -51,7 +51,7 @@ def handle_send_request(pid):
 # handles reply command when request is received
 def handle_send_reply(pid):
     time.sleep(2)
-    message = 'reply ' + str(lamportClock) + ' ' + str(pid)
+    message = 'reply ' + str(lamportClock) + ' ' + str(process_id)
     print("send: " + message)
     connectedClientSockets[pid].sendall(message.encode())
 
@@ -59,7 +59,7 @@ def handle_send_reply(pid):
 # handles release command after finished writing
 def handle_send_release(pid):
     time.sleep(2)
-    message = 'release ' + str(lamportClock) + ' ' + str(pid)
+    message = 'release ' + str(lamportClock) + ' ' + str(process_id)
     print("send: " + message)
     connectedClientSockets[pid].sendall(message.encode())
 
@@ -114,6 +114,7 @@ def handle_write_to_server(sentence):
     global replies
     global repliesExpected
     global lamportClock
+    global startedWriteThread
     releaseCounter = 0
     stopped = False
     print("started")
@@ -122,15 +123,16 @@ def handle_write_to_server(sentence):
         # print(repliesExpected)
         # print(replies)
         if (repliesExpected == replies):
+            startedWriteThread = True
             while not priorityQueue.empty():
                 tempTuple = priorityQueue.get()
-                if (tempTuple[0] == process_id):
+                if (tempTuple[1] == process_id):
                     sentence = sentencesToWrite[0]
-                    sentencesToWrite.pop()
+                    sentencesToWrite.pop(0)
                     words = sentence.split()
                     while len(words):
-                        server_socket.sendall(words[0].encode())
-                        words.pop()
+                        server_socket.send(words[0].encode())
+                        words.pop(0)
                         ready = server_socket.recv(2048).decode()
                     releaseCounter += 1
                 else:
@@ -143,17 +145,18 @@ def handle_write_to_server(sentence):
 
     while len(sentencesToWriteAfterStart):
         sentence = sentencesToWriteAfterStart[0]
-        sentencesToWriteAfterStart.pop()
+        sentencesToWriteAfterStart.pop(0)
         words = sentence.split()
         while len(words):
             server_socket.sendall(words[0].encode())
-            words.pop()
+            words.pop(0)
             ready = server_socket.recv(2048).decode()
 
 
     replies = 0
     repliesExpected = 0
     lamportClock += 1
+    startedWriteThread = False
     for j in range(0, releaseCounter):
         for i in connectedClientIDs:
             threading.Thread(target=handle_send_release, args=[i]).start()
@@ -202,8 +205,8 @@ def handle_input():
                     if not startedWriteThread:
                         threading.Thread(target=handle_write_to_server, args=([inp])).start()
                         startedWriteThread = True
-                    for i in connectedClientIDs:
-                        threading.Thread(target=handle_send_request, args=[i]).start()
+                        for i in connectedClientIDs: # might not be correct indenting
+                            threading.Thread(target=handle_send_request, args=[i]).start()
                 else:
                     sentencesToWriteAfterStart.append(int)
             elif inp == 'exit':
@@ -213,13 +216,13 @@ def handle_input():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print(f'Usage: python {sys.argv[0]} <process_id> <serverPort>')
-        sys.exit()
+    # if len(sys.argv) != 3:
+    #     print(f'Usage: python {sys.argv[0]} <process_id> <serverPort>')
+    #     sys.exit()
 
     global process_id 
-    process_id = int(sys.argv[1])
-    server_port = int(sys.argv[2])
+    process_id = sys.argv[1]
+    server_port = sys.argv[2]
 
     server_socket.connect((socket.gethostname(), server_port))
 
